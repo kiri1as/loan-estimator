@@ -1,4 +1,5 @@
 import pandas as pd
+from pandas import DataFrame
 from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split, GridSearchCV
@@ -7,7 +8,7 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 import joblib
 
 
-def prepare_dataframe(dataframe: pd.DataFrame) -> pd.DataFrame:
+def prepared_data(dataframe: pd.DataFrame) -> tuple[DataFrame, list[str], list[str]]:
     dataframe['Gender'] = dataframe['Gender'].fillna(dataframe['Gender'].mode()[0])
     dataframe['Married'] = dataframe['Married'].fillna(dataframe['Married'].mode()[0])
     dataframe['Dependents'] = dataframe['Dependents'].fillna(dataframe['Dependents'].mode()[0])
@@ -16,12 +17,13 @@ def prepare_dataframe(dataframe: pd.DataFrame) -> pd.DataFrame:
     dataframe['Credit_History'] = dataframe['Credit_History'].fillna(dataframe['Credit_History'].mode()[0])
     dataframe['LoanAmount'] = dataframe['LoanAmount'].fillna(dataframe['LoanAmount'].mean())
     dataframe['Loan_Amount_Term'] = dataframe['Loan_Amount_Term'].fillna(dataframe['Loan_Amount_Term'].mean())
-    return dataframe
 
-def train_model(dataframe: pd.DataFrame) -> GridSearchCV:
     categorical_features = ['Gender', 'Married', 'Education', 'Self_Employed', 'Property_Area']
     numerical_features = ['Dependents', 'ApplicantIncome', 'CoapplicantIncome', 'LoanAmount', 'Loan_Amount_Term']
+    return dataframe, categorical_features, numerical_features
 
+def train_model(train_data: tuple) -> GridSearchCV:
+    dataframe, categorical_features, numerical_features = train_data
     X = dataframe.drop(columns=['Loan_Status']).drop(columns=['Loan_ID'])
     y = dataframe['Loan_Status'].apply(lambda x: 1 if x == 'Y' else 0)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
@@ -53,7 +55,7 @@ def train_model(dataframe: pd.DataFrame) -> GridSearchCV:
 
 if __name__ == '__main__':
     df = pd.read_csv('loan_data.csv')
-    data = prepare_dataframe(df)
+    data = prepared_data(df)
     model = train_model(data)
     joblib.dump(model, 'loan_approval_model.pkl')
     print("Model training and saving completed")

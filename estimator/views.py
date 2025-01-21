@@ -1,12 +1,20 @@
+import base64
+from io import BytesIO
+
 import joblib
+import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('Agg')  # Set non-interactive backend
 import pandas as pd
+import seaborn as sns
 from django.shortcuts import render
 
+from data_model.creation_script import prepared_data
 from .forms import LoanApplicationForm
 from .models import LoanApplication
 
 
-def predict(request):
+def loan_estimation(request):
     if request.method == 'POST':
         form = LoanApplicationForm(request.POST)
 
@@ -46,11 +54,67 @@ def predict(request):
             loan_application.save()
             print(loan_application.loan_id)
 
-            return render(request, 'estimation.html', {'result': loan_accepted, 'id': loan_application.loan_id})
+            return render(request, 'result.html', {'result': loan_accepted, 'id': loan_application.loan_id})
     else:
         form = LoanApplicationForm()
-    return render(request, 'application_form.html', {'form': form})
+    return render(request, 'application.html', {'form': form})
 
-def application_list(request):
-    applications = LoanApplication.objects.all()
-    return render(request, 'application_list.html', {'applications': applications})
+
+def loan_data_plots(request):
+    df = pd.read_csv('data_model/loan_data.csv')
+    dataframe, categorical_features, numerical_features = prepared_data(df)
+
+    plt.figure(figsize=(8, 6))
+    sns.countplot(x='Loan_Status', hue='Loan_Status', data=df, palette='viridis')
+    plt.title('Distribution of Loan_Status')
+    buffer_loan_status = BytesIO()
+    plt.savefig(buffer_loan_status, format='png')
+    buffer_loan_status.seek(0)
+    loan_status_plot = base64.b64encode(buffer_loan_status.getvalue()).decode('utf-8')
+    plt.close()
+
+    plt.figure(figsize=(12, 8))
+    sns.histplot(df['LoanAmount'], kde=True)
+    plt.title('Loan Amount Distribution')
+    buffer_loan_amount = BytesIO()
+    plt.savefig(buffer_loan_amount, format='png')
+    buffer_loan_amount.seek(0)
+    loan_amount_plot = base64.b64encode(buffer_loan_amount.getvalue()).decode('utf-8')
+    plt.close()
+
+    plt.figure(figsize=(12, 8))
+    sns.boxplot(x='Loan_Status', y='ApplicantIncome', data=df)
+    plt.title('Applicant Income vs Loan Status')
+    buffer_income_vs_loan = BytesIO()
+    plt.savefig(buffer_income_vs_loan, format='png')
+    buffer_income_vs_loan.seek(0)
+    income_vs_loan_plot = base64.b64encode(buffer_income_vs_loan.getvalue()).decode('utf-8')
+    plt.close()
+
+    plt.figure(figsize=(8, 6))
+    sns.countplot(x='Credit_History', hue='Loan_Status', data=df, palette='Set2')
+    plt.title('Loan Status by Credit History')
+    buffer_credit_history = BytesIO()
+    plt.savefig(buffer_credit_history, format='png')
+    buffer_credit_history.seek(0)
+    credit_history_plot = base64.b64encode(buffer_credit_history.getvalue()).decode('utf-8')
+    plt.close()
+
+    correlation_matrix = df[numerical_features].corr()
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt=".2f")
+    plt.title('Correlation Matrix')
+    buffer_correlation_matrix = BytesIO()
+    plt.savefig(buffer_correlation_matrix, format='png')
+    buffer_correlation_matrix.seek(0)
+    correlation_matrix_plot = base64.b64encode(buffer_correlation_matrix.getvalue()).decode('utf-8')
+    plt.close()
+
+    # Pass the plot images to the template
+    return render(request, 'charts.html', {
+        'loan_status_plot': loan_status_plot,
+        'loan_amount_plot': loan_amount_plot,
+        'income_vs_loan_plot': income_vs_loan_plot,
+        'credit_history_plot': credit_history_plot,
+        'correlation_matrix_plot': correlation_matrix_plot,
+    })
