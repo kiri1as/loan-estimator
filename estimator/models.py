@@ -20,3 +20,4 @@ class LoanApplication(models.Model):
     Credit_History = models.FloatField()
     Property_Area = models.CharField(max_length=20, choices=PROPERTY_AREA_CHOICES)
     Loan_Status = models.CharField(max_length=10, null=True, blank=True)
+
