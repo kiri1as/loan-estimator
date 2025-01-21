@@ -4,7 +4,7 @@ from io import BytesIO
 import joblib
 import matplotlib.pyplot as plt
 import matplotlib
-matplotlib.use('Agg')  # Set non-interactive backend
+matplotlib.use('Agg')
 import pandas as pd
 import seaborn as sns
 from django.shortcuts import render
@@ -110,7 +110,6 @@ def loan_data_plots(request):
     correlation_matrix_plot = base64.b64encode(buffer_correlation_matrix.getvalue()).decode('utf-8')
     plt.close()
 
-    # Pass the plot images to the template
     return render(request, 'charts.html', {
         'loan_status_plot': loan_status_plot,
         'loan_amount_plot': loan_amount_plot,
