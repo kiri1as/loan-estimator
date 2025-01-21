@@ -9,7 +9,7 @@ import pandas as pd
 import seaborn as sns
 from django.shortcuts import render
 
-from data_model.creation_script import prepared_data
+from creation_script import prepared_data
 from .forms import LoanApplicationForm
 from .models import LoanApplication
 

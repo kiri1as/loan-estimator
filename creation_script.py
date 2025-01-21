@@ -22,6 +22,7 @@ def prepared_data(dataframe: pd.DataFrame) -> tuple[DataFrame, list[str], list[s
     numerical_features = ['Dependents', 'ApplicantIncome', 'CoapplicantIncome', 'LoanAmount', 'Loan_Amount_Term']
     return dataframe, categorical_features, numerical_features
 
+
 def train_model(train_data: tuple) -> GridSearchCV:
     dataframe, categorical_features, numerical_features = train_data
     X = dataframe.drop(columns=['Loan_Status']).drop(columns=['Loan_ID'])
@@ -53,9 +54,14 @@ def train_model(train_data: tuple) -> GridSearchCV:
     return grid_search.best_estimator_
 
 
-if __name__ == '__main__':
-    df = pd.read_csv('loan_data.csv')
+def main():
+    df = pd.read_csv('data_model/loan_data.csv')
     data = prepared_data(df)
     model = train_model(data)
-    joblib.dump(model, 'loan_approval_model.pkl')
+    joblib.dump(model, 'data_model/loan_approval_model.pkl')
     print("Model training and saving completed")
+
+
+if __name__ == '__main__':
+    print("Running creation script...")
+    main()
