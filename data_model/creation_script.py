@@ -11,20 +11,19 @@ def prepare_dataframe(dataframe: pd.DataFrame) -> pd.DataFrame:
     dataframe['Gender'] = dataframe['Gender'].fillna(dataframe['Gender'].mode()[0])
     dataframe['Married'] = dataframe['Married'].fillna(dataframe['Married'].mode()[0])
     dataframe['Dependents'] = dataframe['Dependents'].fillna(dataframe['Dependents'].mode()[0])
+    dataframe['Dependents'] = dataframe['Dependents'].replace('3+', '5').astype(int)
     dataframe['Self_Employed'] = dataframe['Self_Employed'].fillna(dataframe['Self_Employed'].mode()[0])
     dataframe['Credit_History'] = dataframe['Credit_History'].fillna(dataframe['Credit_History'].mode()[0])
     dataframe['LoanAmount'] = dataframe['LoanAmount'].fillna(dataframe['LoanAmount'].mean())
     dataframe['Loan_Amount_Term'] = dataframe['Loan_Amount_Term'].fillna(dataframe['Loan_Amount_Term'].mean())
     return dataframe
 
-
 def train_model(dataframe: pd.DataFrame) -> GridSearchCV:
-    categorical_features = ['Gender', 'Married', 'Dependents', 'Education', 'Self_Employed', 'Property_Area']
-    numerical_features = ['ApplicantIncome', 'CoapplicantIncome', 'LoanAmount', 'Loan_Amount_Term']
+    categorical_features = ['Gender', 'Married', 'Education', 'Self_Employed', 'Property_Area']
+    numerical_features = ['Dependents', 'ApplicantIncome', 'CoapplicantIncome', 'LoanAmount', 'Loan_Amount_Term']
 
     X = dataframe.drop(columns=['Loan_Status']).drop(columns=['Loan_ID'])
     y = dataframe['Loan_Status'].apply(lambda x: 1 if x == 'Y' else 0)
-
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     preprocessor = ColumnTransformer(
@@ -51,10 +50,10 @@ def train_model(dataframe: pd.DataFrame) -> GridSearchCV:
     grid_search.fit(X_train, y_train)
     return grid_search.best_estimator_
 
+
 if __name__ == '__main__':
     df = pd.read_csv('loan_data.csv')
     data = prepare_dataframe(df)
     model = train_model(data)
     joblib.dump(model, 'loan_approval_model.pkl')
-
-
+    print("Model training and saving completed")
