@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+Loan Estimation Result
+{% endblock %}
+
+{% block content %}
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h2 {
+            color: #2c3e50;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+        .result-message {
+            padding: 20px;
+            border-radius: 6px;
+            font-size: 18px;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+        .details {
+            font-size: 16px;
+            color: #34495e;
+            margin: 20px 0;
+            padding: 10px;
+            border-left: 4px solid #4a90e2;
+            background-color: #f8f9fa;
+        }
+        .button-container {
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+            margin-top: 30px;
+        }
+        .button-container a {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #4a90e2;
+            color: #fff;
+            font-size: 18px;
+            text-decoration: none;
+            border-radius: 6px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease;
+        }
+        .button-container a:hover {
+            background-color: #357ab7;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <h2>Loan Estimation Result</h2>
+
+    {% if result == "Yes" %}
+    <div class="result-message" style="background-color: #27ae60;">
+        <p><strong>Congratulations!</strong> Your loan application has been accepted!</p>
+    </div>
+    {% elif result == "No" %}
+    <div class="result-message" style="background-color: #e74c3c;">
+        <p><strong>Unfortunately.</strong> Your loan application has been rejected.</p>
+    </div>
+    {% endif %}
+
+    <div class="details">
+        <p><strong>Loan Application ID:</strong> <span style="color: #2980b9;">{{ id }}</span></p>
+    </div>
+
+    <div class="button-container">
+        <a href="/">Start again</a>
+        <a href="predict/charts">See charts</a>
+    </div>
+</div>
+</body>
+{% endblock %}
